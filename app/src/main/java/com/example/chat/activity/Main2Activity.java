@@ -118,6 +118,7 @@ public class Main2Activity extends AppCompatActivity {
                     viewPagerAdapter.addFragment(new ChatsFragment(), "Chats");
                 }else {
                     viewPagerAdapter.addFragment(new ChatsFragment(), "("+unread+") Chats");
+
                 }
 
 

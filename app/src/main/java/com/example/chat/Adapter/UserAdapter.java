@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -48,6 +49,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
 
     String theLastMessage;
+    Boolean isseen = null;
 
     public UserAdapter(Context mContext, List<User> mUsers, Boolean ischat, String busqueda) {
         this.mContext = mContext;
@@ -167,7 +169,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                                 || chat.getReciver().equals(userid)
                                 && chat.getSender().equals(firebaseUser.getUid())
                         ){
+                            //
+
                             theLastMessage = chat.getMessage();
+
+                            if (chat.getReciver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid)){
+                                isseen = chat.getIsseen();
+                            }
+
+                            //
                         }
                     }
 
@@ -178,7 +188,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                         last_msg.setText("No message.");
                         break;
                     default:
-                        last_msg.setText(theLastMessage);
+                        if (isseen){
+                            last_msg.setText(theLastMessage);
+                        }else {
+                            last_msg.setText(Html.fromHtml("<b>"+ theLastMessage +"</b>"));
+                        }
+
                 }
 
 
@@ -193,12 +208,4 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             }
         });
     }
-
-    /*CAMBIADOR A NEGRITA*/
-  /*  public SpannableStringBuilder append(CharSequence text, Object what, int flags) {
-        int start = length();
-        append(text);
-        setSpan(what, start, length(), flags);
-        return this;
-    }*/
 }

@@ -16,12 +16,17 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
 
+import com.example.chat.R;
 import com.example.chat.activity.MessageActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.ResourceBundle;
 
 public class MyFirebaseMessaging extends FirebaseMessagingService {
     @Override
@@ -55,7 +60,8 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         String user = remoteMessage.getData().get("user");
         String icon = remoteMessage.getData().get("icon");
         String title = remoteMessage.getData().get("title");
-        String body = remoteMessage.getData().get("body");
+        String body = remoteMessage.getData().get("msj");
+        String usu = remoteMessage.getData().get("namerecivier");
 
         RemoteMessage.Notification notification = remoteMessage.getNotification();
         int j = Integer.parseInt(user.replaceAll("[\\D]",  ""));
@@ -67,7 +73,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         Uri defaultSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
         OreoNotification oreoNotification = new OreoNotification(this);
-        Notification.Builder builder = oreoNotification.getOreoNotification(title,body,pendingIntent, defaultSound, icon);
+        Notification.Builder builder = oreoNotification.getOreoNotification(usu,body,pendingIntent, defaultSound, icon);
 
         int i = 0;
         if(j > 0){
@@ -83,7 +89,8 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         String user = remoteMessage.getData().get("user");
         String icon = remoteMessage.getData().get("icon");
         String title = remoteMessage.getData().get("title");
-        String body = remoteMessage.getData().get("body");
+        String body = remoteMessage.getData().get("msj");
+        String usu = remoteMessage.getData().get("namerecivier");
 
         RemoteMessage.Notification notification = remoteMessage.getNotification();
         int j = Integer.parseInt(user.replaceAll("[\\D]",  ""));
@@ -94,22 +101,22 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         PendingIntent pendingIntent = (PendingIntent) PendingIntent.getActivities(this, j, new Intent[]{intent}, PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setSmallIcon(Integer.parseInt(icon))
-                .setContentTitle(title)
+                .setContentTitle(usu)
                 .setContentText(body)
                 .setSound(defaultSound)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
+
         NotificationManager noti = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
 
         int i = 0;
         if(j > 0){
             i = j;
         }
-
         noti.notify(i, builder.build());
     }
 }

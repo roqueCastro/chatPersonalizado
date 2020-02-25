@@ -161,6 +161,7 @@ public class MessageActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    /*VISTO MESSAGE*/
     private void seenMessage(final String userid){
         reference = FirebaseDatabase.getInstance().getReference("Chats");
 
@@ -189,7 +190,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-    /*ENVIO DE MENSAJE AND NOTIFICATION*/
+    /*ENVIO DE MENSAJE */
     private  void  sendMessage(String sender, final String reciver, String message){
 
         /*ENVIAR MENSAJE ******************/
@@ -226,7 +227,7 @@ public class MessageActivity extends AppCompatActivity {
         });
 
 
-        /*NOTIFICACION*******************/
+        /**************************************NOTIFICACION*******************/
 
         final String msg = message;
 
@@ -255,6 +256,7 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
+    /*ENVIO DE NOTIFICACIONES*/
     private void sendNotificationRecivier(String reciver, final String username, final String msg) {
         DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("Tokens");
         Query query = tokens.orderByKey().equalTo(reciver);
@@ -266,31 +268,30 @@ public class MessageActivity extends AppCompatActivity {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
 
                     Token token = snapshot.getValue(Token.class);
-                    Data data = new Data(firebaseUser.getUid(), R.mipmap.ic_launcher, username + ": " + msg, "", userid);
+                    Data data = new Data(firebaseUser.getUid(), R.mipmap.ic_launcher, msg, username, "", userid);
 
                     Sender sender = new Sender(data, token.getToken());
 
                     apiService.sendNotification(sender)
-                            .enqueue(new Callback<MyResponse>() {
-                                @Override
-                                public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
-                                    /**/
+                    .enqueue(new Callback<MyResponse>() {
+                        @Override
+                        public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+                            /**/
 
-                                    if (response.code() == 200){
-                                        if (response.body().success ==1){
-                                            //Notificacion no es enviada al otro usuario
+                            if (response.code() == 200){
+                                if (response.body().success ==1){
+                                    //Notificacion no es enviada al otro usuario
 //                                            Toast.makeText(getApplicationContext(), "Failds Noti", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-
-                                    /**/
                                 }
+                            }
 
-                                @Override
-                                public void onFailure(Call<MyResponse> call, Throwable t) {
+                            /**/
+                        }
 
-                                }
-                            });
+                        @Override
+                        public void onFailure(Call<MyResponse> call, Throwable t) {
+                        }
+                    });
 
                 }
 

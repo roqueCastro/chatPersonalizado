@@ -3,14 +3,16 @@ package com.example.chat.Notifications;
 public class Data {
     private  String user;
     private int icon;
-    private String body;
+    private String msj;
+    private String namerecivier;
     private String title;
     private String sented;
 
-    public Data(String user, int icon, String body, String title, String sented) {
+    public Data(String user, int icon, String msj, String namerecivier, String title, String sented) {
         this.user = user;
         this.icon = icon;
-        this.body = body;
+        this.msj = msj;
+        this.namerecivier = namerecivier;
         this.title = title;
         this.sented = sented;
     }
@@ -34,12 +36,20 @@ public class Data {
         this.icon = icon;
     }
 
-    public String getBody() {
-        return body;
+    public String getMsj() {
+        return msj;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public void setMsj(String msj) {
+        this.msj = msj;
+    }
+
+    public String getNamerecivier() {
+        return namerecivier;
+    }
+
+    public void setNamerecivier(String namerecivier) {
+        this.namerecivier = namerecivier;
     }
 
     public String getTitle() {
