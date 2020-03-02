@@ -65,5 +65,51 @@
         android:layout_marginLeft="10dp"
         android:maxLines="1"
         />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/username_ui"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:orientation="horizontal">
+
+
+        <RelativeLayout
+            android:id="@+id/lyt_numero_chat"
+            android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:visibility="gone"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/shape_circle"
+                />
+
+            <TextView
+                android:id="@+id/txt_numero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10"
+                android:paddingRight="6dp"
+                android:textStyle="bold"
+                android:textSize="10sp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:layout_marginStart="1dp"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@android:color/background_light"
+                android:layout_marginLeft="1dp" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+
 
 </RelativeLayout>

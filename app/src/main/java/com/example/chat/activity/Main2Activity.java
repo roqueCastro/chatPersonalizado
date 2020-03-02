@@ -1,6 +1,7 @@
 package com.example.chat.activity;
 
 import android.app.Application;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -17,10 +18,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.chat.Notifications.Client;
 import com.example.chat.Notifications.Data;
+import com.example.chat.Notifications.MyResponse;
+import com.example.chat.Notifications.Sender;
+import com.example.chat.Notifications.Token;
 import com.example.chat.R;
+
+import com.example.chat.fragments.APIService;
 import com.example.chat.fragments.ChatsFragment;
 import com.example.chat.fragments.ProfileFragment;
 import com.example.chat.fragments.UsersFragment;
@@ -32,12 +40,20 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.FormatFlagsConversionMismatchException;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Main2Activity extends AppCompatActivity {
 
@@ -47,6 +63,14 @@ public class Main2Activity extends AppCompatActivity {
     FirebaseUser firebaseUser;
     Context context;
     DatabaseReference reference;
+
+    ArrayList<Chat> chats;
+    ArrayList<User> users;
+    ArrayList<Data> datas;
+
+    String nombre_usuario;
+
+    APIService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,10 +82,16 @@ public class Main2Activity extends AppCompatActivity {
         getSupportActionBar().setTitle("");
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        apiService = Client.getClient("https://fcm.googleapis.com/").create(APIService.class);
+
         profile_image = findViewById(R.id.profile_image);
         username = findViewById(R.id.textViewusername);
 
         context = Main2Activity.this;
+
+        chats = new ArrayList<>();
+        users = new ArrayList<>();
+        datas = new ArrayList<>();
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
@@ -72,7 +102,8 @@ public class Main2Activity extends AppCompatActivity {
 
                 User user = dataSnapshot.getValue(User.class);
 
-                username.setText(user.getUsername());
+                nombre_usuario = user.getUsername();
+                username.setText(nombre_usuario);
 
                 if (user.getImageURL().equals("default")){
                     profile_image.setImageResource(R.mipmap.ic_launcher_round);
@@ -104,13 +135,17 @@ public class Main2Activity extends AppCompatActivity {
                 ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
                 int unread = 0;
+                chats.clear();
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+
+
 
                     Chat chat = snapshot.getValue(Chat.class);
 
                     if (chat.getReciver().equals(firebaseUser.getUid()) && !chat.getIsseen()){
                         unread++;
+                        chats.add(chat);
                     }
                 }
 
@@ -129,6 +164,11 @@ public class Main2Activity extends AppCompatActivity {
 
                 tabLayout.setupWithViewPager(viewPager);
 
+               /* if (chats.size() > 0){
+                    sendNotificationRecivier(chats);
+                }*/
+
+
                 /**/
             }
 
@@ -137,6 +177,125 @@ public class Main2Activity extends AppCompatActivity {
 
             }
         });
+    }
+
+    /*ENVIO DE NOTIFICACION*/
+    private void sendNotificationRecivier(final ArrayList<Chat> chats) {
+
+        reference = FirebaseDatabase.getInstance().getReference();
+        reference.child("Users").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                users.clear();
+                for (DataSnapshot objSnapshot : dataSnapshot.getChildren()){
+                    User user = objSnapshot.getValue(User.class);
+                    users.add(user);
+                }
+
+
+                //Toast.makeText(getApplicationContext(), "Listo", Toast.LENGTH_SHORT).show();\
+                notificacionesEnviar(chats, users);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void notificacionesEnviar(ArrayList<Chat> chats, ArrayList<User> users) {
+        Data data = null;
+        datas.clear();
+
+        for (Chat chat : chats){
+            /**/
+            for (User user: users){
+                //
+                if (chat.getSender().equals(user.getId())){
+                    data = new Data();
+                    data.setUser(chat.getSender());
+                    data.setIcon(R.mipmap.ic_launcher);
+                    data.setMsj(chat.getMessage());
+                    data.setNamerecivier(user.getUsername());
+                    data.setTitle("");
+                    data.setSented(firebaseUser.getUid());
+                    datas.add(data);
+                }
+                //
+            }
+            /**/
+        }
+
+        /*Convertir OBject en string*/
+        Gson json = new Gson();
+
+        final String responseDatos = json.toJson(datas);
+
+        /*Convetir object string en jsonObject*/
+      /*  Type dataAlType = new TypeToken<ArrayList<Data>>(){}.getType();
+        ArrayList<Data> datosResponse = json.fromJson(responseDatos,dataAlType);*/
+
+        //Toast.makeText(getApplicationContext(), "Listo", Toast.LENGTH_SHORT).show();
+        clearNotification();
+        DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("Tokens");
+        Query query = tokens.orderByKey().equalTo(firebaseUser.getUid());
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+
+                    Token token = snapshot.getValue(Token.class);
+                    Data data = new Data("", 0, "", "", "", "", responseDatos);
+
+                    Sender sender = new Sender(data, token.getToken());
+                   // Toast.makeText(getApplicationContext(), "Failds Noti", Toast.LENGTH_SHORT).show();
+                    apiService.sendNotification(sender)
+                            .enqueue(new Callback<MyResponse>() {
+                                @Override
+                                public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+
+
+                                    if (response.code() == 200){
+                                        if (response.body().success ==1){
+                                            //Notificacion no es enviada al otro usuario
+//                                            Toast.makeText(getApplicationContext(), "Failds Noti", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+
+
+                                }
+
+                                @Override
+                                public void onFailure(Call<MyResponse> call, Throwable t) {
+                                    Toast.makeText(getApplicationContext(), "Error->\n" + call.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    /*CERRAR NOTIFICACIONES*/
+    private void clearNotification() {
+
+        int notificationId = Integer.parseInt(firebaseUser.getUid().replaceAll("[\\D]",  ""));
+
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.cancel(notificationId);
     }
 
     /*MENU OPTIONS*/

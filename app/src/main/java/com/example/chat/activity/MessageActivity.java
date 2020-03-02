@@ -1,9 +1,13 @@
 package com.example.chat.activity;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.annotation.FontRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -35,6 +39,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +56,7 @@ public class MessageActivity extends AppCompatActivity {
     TextView username;
 
     FirebaseUser firebaseUser;
-    DatabaseReference reference;
+    DatabaseReference reference, refSeen;
 
     Intent intent;
 
@@ -61,6 +66,11 @@ public class MessageActivity extends AppCompatActivity {
     MessageAdapter messageAdapter;
     List<Chat> chats;
 
+    ArrayList<Chat> chatsN;
+    ArrayList<User> users;
+    ArrayList<Data> datas;
+    ArrayList<String> listaUserMessaging;
+
     RecyclerView recyclerView;
 
     ValueEventListener seenListener;
@@ -69,6 +79,8 @@ public class MessageActivity extends AppCompatActivity {
     Boolean notify = false;
 
     String userid;
+
+    int notifi_envio = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +102,12 @@ public class MessageActivity extends AppCompatActivity {
 
 
         apiService = Client.getClient("https://fcm.googleapis.com/").create(APIService.class);
+
+        chatsN = new ArrayList<>();
+        users = new ArrayList<>();
+        datas = new ArrayList<>();
+        listaUserMessaging = new ArrayList<>();
+
 
         profile_image = findViewById(R.id.profile_image_m);
         username = findViewById(R.id.textViewusername_m);
@@ -163,11 +181,11 @@ public class MessageActivity extends AppCompatActivity {
 
     /*VISTO MESSAGE*/
     private void seenMessage(final String userid){
-        reference = FirebaseDatabase.getInstance().getReference("Chats");
+        refSeen = FirebaseDatabase.getInstance().getReference("Chats");
 
-        seenListener = reference.addValueEventListener(new ValueEventListener() {
+        seenListener = refSeen.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)    {
                 /**/
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
@@ -193,7 +211,8 @@ public class MessageActivity extends AppCompatActivity {
     /*ENVIO DE MENSAJE */
     private  void  sendMessage(String sender, final String reciver, String message){
 
-        /*ENVIAR MENSAJE ******************/
+        notifi_envio = 1;
+
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
 
         HashMap<String, Object> hashMap = new HashMap<>();
@@ -212,6 +231,7 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 /**/
+                chatsNoti(reciver);
 
                 if (!dataSnapshot.exists()){
                     chatRef.child("id").setValue(reciver);
@@ -227,16 +247,18 @@ public class MessageActivity extends AppCompatActivity {
         });
 
 
-        /**************************************NOTIFICACION*******************/
+        /**************************************SEND NOTIFICACION*******************/
 
-        final String msg = message;
 
-        reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
+
+      //  final String msg = message;
+
+       /* reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                /**/
+                *//**//*
 
                 User user = dataSnapshot.getValue(User.class);
 
@@ -245,6 +267,191 @@ public class MessageActivity extends AppCompatActivity {
                 }
                 notify = false;
 
+                *//**//*
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });*/
+
+    }
+
+    /*ENVIO DE NOTIFICACION*/
+    private void sendNotificationRecivier(final ArrayList<Chat> chatsN, final String reciver) {
+
+        reference = FirebaseDatabase.getInstance().getReference();
+        reference.child("Users").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                users.clear();
+                for (DataSnapshot objSnapshot : dataSnapshot.getChildren()){
+                    User user = objSnapshot.getValue(User.class);
+                    users.add(user);
+                }
+
+
+                //Toast.makeText(getApplicationContext(), "Listo", Toast.LENGTH_SHORT).show();\
+                notificacionesEnviar(chatsN, users, reciver);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    //COMPROVANTE ENVIO NOTIFICACION
+    private void notificacionesEnviar(ArrayList<Chat> chatsN, ArrayList<User> users, String reciver) {
+        if (notifi_envio == 1){
+            notifi_envio = 0;
+
+
+            String usu_enviar = "";
+
+
+            Data data = null;
+            datas.clear();
+            listaUserMessaging.clear();
+
+            for (Chat chat : chatsN){
+                /**/
+                //ACOMODAR LISTA DE MENSAJES ORDENADAMENTE
+                if (usu_enviar == ""){
+                    usu_enviar = chat.getSender();
+                    listaUserMessaging.add(chat.getSender());
+                }else{
+                    if(usu_enviar.equals(chat.getSender())){
+
+                    }else {
+//                        vent_envio = 1;
+                        listaUserMessaging.add(chat.getSender());
+                    }
+                }
+                /**/
+            }
+
+            /*AGREGAR MESSAGES*/
+            for (int i = 0; i<listaUserMessaging.size(); i++){
+                /*1*/
+                for (Chat chat : chatsN){
+                    /*2*/
+                    if(listaUserMessaging.get(i).equals(chat.getSender())){
+                        /*3*/
+                         for (User user: users){
+                             /*4*/
+                            if (chat.getSender().equals(user.getId())){
+                                /*5*/
+                                data = new Data();
+                                data.setUser(chat.getSender());
+                                data.setIcon(R.mipmap.ic_launcher);
+                                data.setMsj(chat.getMessage());
+                                data.setNamerecivier(user.getUsername());
+                                data.setTitle("");
+                                data.setSented(firebaseUser.getUid());
+                                datas.add(data);
+                                /*5*/
+                            }
+                            /*4*/
+                        }
+                        /*3*/
+                    }
+                    /*2*/
+                }
+                /*1*/
+            }
+            /*0*/
+
+            /*Convertir OBject en string*/
+            Gson json = new Gson();
+
+            final String responseDatos = json.toJson(datas);
+
+            /*Convetir object string en jsonObject*/
+      /*  Type dataAlType = new TypeToken<ArrayList<Data>>(){}.getType();
+        ArrayList<Data> datosResponse = json.fromJson(responseDatos,dataAlType);*/
+
+            //Toast.makeText(getApplicationContext(), "Listo", Toast.LENGTH_SHORT).show();
+            /// clearNotification();
+            DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("Tokens");
+            Query query = tokens.orderByKey().equalTo(reciver);
+            query.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+
+                        Token token = snapshot.getValue(Token.class);
+                        Data data = new Data(firebaseUser.getUid(), 0, "", "", "", userid, responseDatos);
+
+                        Sender sender = new Sender(data, token.getToken());
+                        // Toast.makeText(getApplicationContext(), "Failds Noti", Toast.LENGTH_SHORT).show();
+                        apiService.sendNotification(sender)
+                                .enqueue(new Callback<MyResponse>() {
+                                    @Override
+                                    public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+
+
+
+                                        if (response.code() == 200){
+                                            if (response.body().success ==1){
+                                                //Notificacion no es enviada al otro usuario
+//                                            Toast.makeText(getApplicationContext(), "Failds Noti", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+
+
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<MyResponse> call, Throwable t) {
+                                        Toast.makeText(getApplicationContext(), "Error->\n" + call.toString(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+                    }
+
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+
+
+        }
+    }
+
+    //CHAT NOTIFICACION
+    public void  chatsNoti (final String reciver){
+        reference = FirebaseDatabase.getInstance().getReference("Chats");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                /**/
+
+                chatsN.clear();
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+
+
+
+                    Chat chat = snapshot.getValue(Chat.class);
+
+                    if (chat.getReciver().equals(userid) && !chat.getIsseen()){
+                        chatsN.add(chat);
+                    }
+                }
+
+                sendNotificationRecivier(chatsN, reciver);
                 /**/
             }
 
@@ -253,17 +460,18 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         });
-
     }
 
-    /*ENVIO DE NOTIFICACIONES*/
+    /******************************************************************************************/
+
+    //NULA NO SE UTILIZA.
     private void sendNotificationRecivier(String reciver, final String username, final String msg) {
-        DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("Tokens");
+        /*DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("Tokens");
         Query query = tokens.orderByKey().equalTo(reciver);
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                /**/
+                *//**//*
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
 
@@ -276,7 +484,7 @@ public class MessageActivity extends AppCompatActivity {
                     .enqueue(new Callback<MyResponse>() {
                         @Override
                         public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
-                            /**/
+                            *//**//*
 
                             if (response.code() == 200){
                                 if (response.body().success ==1){
@@ -285,7 +493,7 @@ public class MessageActivity extends AppCompatActivity {
                                 }
                             }
 
-                            /**/
+                            *//**//*
                         }
 
                         @Override
@@ -295,14 +503,14 @@ public class MessageActivity extends AppCompatActivity {
 
                 }
 
-                /**/
+                *//**//*
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        });*/
     }
 
     /*LEER MENSAJES*/
@@ -327,9 +535,11 @@ public class MessageActivity extends AppCompatActivity {
                         chats.add(chat);
                     }
 
-                    messageAdapter = new MessageAdapter(getApplicationContext(), chats, imagenurl);
-                    recyclerView.setAdapter(messageAdapter);
+
                 }
+
+                messageAdapter = new MessageAdapter(getApplicationContext(), chats, imagenurl);
+                recyclerView.setAdapter(messageAdapter);
                 /**/
             }
 
@@ -350,22 +560,47 @@ public class MessageActivity extends AppCompatActivity {
         reference.updateChildren(hashMap);
     }
 
+
+    /*CERRAR NOTIFICACIONES*/
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void clearNotification(String userid) {
+
+        //int notificationId = Integer.parseInt(userid.replaceAll("[\\D]",  ""));
+
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null){
+           // Toast.makeText(getApplicationContext(), "ON_RESUM",Toast.LENGTH_SHORT).show();
+            manager.cancelAll();
+
+        }
+
+    }
+
     /*APP EN EJECUCCION*/
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onResume() {
         super.onResume();
+
+
+        clearNotification(userid);
+
+        //STATUS EN LINEA//
         status("online");
+
+        //USUARIO EN EL CHAT PARA NO ENVIAR LA NOTIFICACION//
         currentUser(userid);
+       // Toast.makeText(getApplicationContext(), "ON_RESUM",Toast.LENGTH_SHORT).show();
     }
 
     /*APP EN PAUSA O FUERA DE ELLA*/
-
     @Override
     protected void onPause() {
         super.onPause();
-        reference.removeEventListener(seenListener);
+        refSeen.removeEventListener(seenListener);//Elliminar el evento de la databaseReference..
         status("offline");
         currentUser("none");
+        //Toast.makeText(getApplicationContext(), "ON_PAUSE",Toast.LENGTH_SHORT).show();
     }
 
 }

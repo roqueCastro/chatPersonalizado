@@ -64,8 +64,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         if (i == mChats.size()-1){
             if (chat.getIsseen()){
+                holder.txt_seen.setVisibility(View.VISIBLE);
                 holder.txt_seen.setText("Seen");
             }else {
+                holder.txt_seen.setVisibility(View.VISIBLE);
                 holder.txt_seen.setText("Delivered");
             }
         }else {

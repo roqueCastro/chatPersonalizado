@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/txt_seen"
             android:layout_below="@+id/show_message_"
+            android:textColor="@android:color/background_dark"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
 

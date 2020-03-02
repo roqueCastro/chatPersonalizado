@@ -7,17 +7,27 @@ public class Data {
     private String namerecivier;
     private String title;
     private String sented;
+    private String dato;
 
-    public Data(String user, int icon, String msj, String namerecivier, String title, String sented) {
+    public Data(String user, int icon, String msj, String namerecivier, String title, String sented, String dato) {
         this.user = user;
         this.icon = icon;
         this.msj = msj;
         this.namerecivier = namerecivier;
         this.title = title;
         this.sented = sented;
+        this.dato = dato;
     }
 
     public Data() {
+    }
+
+    public String getDato() {
+        return dato;
+    }
+
+    public void setDato(String dato) {
+        this.dato = dato;
     }
 
     public String getUser() {

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.net.Uri;
 import android.os.Build;
+import android.support.v4.app.NotificationCompat;
 
 import retrofit2.http.Body;
 
@@ -54,13 +55,16 @@ public class OreoNotification extends ContextWrapper {
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    public Notification.Builder getOreoNotification (String title, String body, PendingIntent pendingIntent, Uri soundUri, String icon){
-        return  new Notification.Builder(getApplicationContext(), CHANNEL_ID)
+    public NotificationCompat.Builder getOreoNotification (){
+        return new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID);
+
+       /* return  new Notification.Builder(getApplicationContext(), CHANNEL_ID)
                 .setContentIntent(pendingIntent)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setSmallIcon(Integer.parseInt(icon))
                 .setSound(soundUri)
-                .setAutoCancel(true);
+                .setAutoCancel(true);*/
     }
+
 }

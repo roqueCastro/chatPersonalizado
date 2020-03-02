@@ -1,5 +1,7 @@
 package com.example.chat.Notifications;
 
+import java.util.ArrayList;
+
 public class Sender {
     public Data data;
     public  String to;

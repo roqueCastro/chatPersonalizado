@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +51,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
 
     String theLastMessage;
-    Boolean isseen = null;
+    boolean isseen = true;
+    int numero_chats = 0;
 
     public UserAdapter(Context mContext, List<User> mUsers, Boolean ischat, String busqueda) {
         this.mContext = mContext;
@@ -69,7 +72,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int i) {
         final User user = mUsers.get(i);
 
-        // PONERLE COLOR AL TEXTO EN LA BUSQUEDA
+        /*PONERLE COLOR AL TEXTO EN LA BUSQUEDA*/
         if (busqueda != null){
             String notes = user.getUsername();
 
@@ -87,20 +90,21 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             holder.username.setText(user.getUsername());
         }
 
-
+        /*AGREGA LA FOTO*/
         if (user.getImageURL().equals("default")){
             holder.profile_name.setImageResource(R.mipmap.ic_launcher);
         }else {
             Glide.with(mContext).load(user.getImageURL()).into(holder.profile_name);
         }
 
+        /*AGREGAR MENSAJE Y NUMERO DE CHATS*/
         if (ischat){
-            lastMessage(user.getId(), holder.last_msg);
+            lastMessage(user.getId(), holder.last_msg, holder.lyt_number, holder.num_chat);
         }else{
             holder.last_msg.setVisibility(View.GONE);
         }
 
-
+        /*AGREGA SI ESTA EN LINEA O NO CON EL PUNTO VERDE O GRIS*/
         if (ischat){
             if (user.getStatus().equals("online")){
                 holder.imgon.setVisibility(View.VISIBLE);
@@ -114,6 +118,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             holder.imgon.setVisibility(View.GONE);
         }
 
+        /*CLICK EN CUALQUIER ITEM*/
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,9 +138,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     public  class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView username, last_msg;
+        public TextView username, last_msg, num_chat;
         public ImageView profile_name;
         private ImageView imgon, imgoff;
+        private RelativeLayout lyt_number;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -145,10 +151,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             imgon = itemView.findViewById(R.id.img_on);
             imgoff = itemView.findViewById(R.id.img_off);
             last_msg = itemView.findViewById(R.id.last_msg);
+            lyt_number = itemView.findViewById(R.id.lyt_numero_chat);
+            num_chat = itemView.findViewById(R.id.txt_numero);
         }
     }
 
-    private void lastMessage(final String userid, final TextView last_msg ){
+    private void lastMessage(final String userid, final TextView last_msg, final RelativeLayout lyt_number, final TextView num_chat){
         theLastMessage = "default";
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
@@ -157,6 +165,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 /**/
+
+
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
                     Chat chat = snapshot.getValue(Chat.class);
@@ -175,6 +185,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
                             if (chat.getReciver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid)){
                                 isseen = chat.getIsseen();
+
+                                if (chat.getIsseen()==false){
+                                    numero_chats++;
+                                }
                             }
 
                             //
@@ -190,14 +204,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                     default:
                         if (isseen){
                             last_msg.setText(theLastMessage);
+                            lyt_number.setVisibility(View.GONE);
                         }else {
                             last_msg.setText(Html.fromHtml("<b>"+ theLastMessage +"</b>"));
+                            lyt_number.setVisibility(View.VISIBLE);
+                            num_chat.setText(String.valueOf(numero_chats));
                         }
 
                 }
 
 
                 theLastMessage = "default";
+                numero_chats = 0;
 
                 /**/
             }
