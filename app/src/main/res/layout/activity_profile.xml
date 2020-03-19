@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.ProfileActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/colorLayerBack"
+        >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorBackLayerS"
+            >
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/firstlayer"
+                >
+                
+                <ImageView
+                    android:layout_marginTop="50dp"
+                    android:layout_marginBottom="50dp"
+                    android:layout_width="300dp"
+                    android:layout_height="300dp"
+                    android:src="@drawable/image_round_roque"
+                    />
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorTitle"
+                    android:text="Roque Castro Garzon"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textStyle="normal"
+                    android:textColor="@color/colorSubtitle"
+                    android:text="sicande, Timana - Huila COLOMBIA"
+                    android:layout_marginBottom="50dp"
+                    android:layout_marginTop="5dp"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="50dp"
+                android:paddingTop="70dp"
+                android:paddingBottom="70dp"
+                android:gravity="center"
+                android:background="@drawable/secondlayer"
+                >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingLeft="12dp"
+                    >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5k"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Likes"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorSubtitlewhite"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingLeft="12dp"
+                    >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="100k"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Me encanta"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorSubtitlewhite"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingLeft="12dp"
+                    >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="12k"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Seguidores"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorSubtitlewhite"
+                        />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

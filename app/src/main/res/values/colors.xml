@@ -5,4 +5,9 @@
     <color name="colorAccent">#226e6e</color>
 
     <color name="colorVerdeClaro">#0CBD0C</color>
+    <color name="colorLayerBack">#241333</color>
+    <color name="colorBackLayerS">#8a56ab</color>
+    <color name="colorTitle">#362742</color>
+    <color name="colorSubtitle">#c5c9cf</color>
+    <color name="colorSubtitlewhite">#b795ce</color>
 </resources>

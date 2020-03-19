@@ -197,6 +197,7 @@ public class ProfileFragment extends Fragment {
         if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null){
             imageUri = data.getData();
 
+            Toast.makeText(getContext(), "Upload in preogress", Toast.LENGTH_SHORT).show();
             if (uploadTask != null && uploadTask.isInProgress()){
                 Toast.makeText(getContext(), "Upload in preogress", Toast.LENGTH_SHORT).show();
             }else {

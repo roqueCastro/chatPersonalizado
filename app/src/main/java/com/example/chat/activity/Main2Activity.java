@@ -318,6 +318,10 @@ public class Main2Activity extends AppCompatActivity {
 
 
                 break;
+
+            case R.id.profile:
+                startActivity(new Intent(Main2Activity.this, ProfileActivity.class));
+                break;
         }
 
         return false;
